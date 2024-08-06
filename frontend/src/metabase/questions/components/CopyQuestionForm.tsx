@@ -16,6 +16,8 @@ import * as Errors from "metabase/lib/errors";
 import { Button } from "metabase/ui";
 import type { CollectionId } from "metabase-types/api";
 
+import { DynamicParameterManager } from "./DynamicParameterManager/DynamicParameterManager";
+
 const QUESTION_SCHEMA = Yup.object({
   name: Yup.string()
     .required(Errors.required)
@@ -64,6 +66,7 @@ export const CopyQuestionForm = ({
       onSubmit={handleDuplicate}
     >
       <Form>
+        <DynamicParameterManager question={computedInitialValues} />
         <FormTextInput
           name="name"
           label={t`Name`}

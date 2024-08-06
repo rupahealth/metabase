@@ -1,6 +1,6 @@
 import Questions from "metabase/entities/questions";
 import Tables from "metabase/entities/tables";
-import type { Card, TableId, UnsavedCard } from "metabase-types/api";
+import type { Card, TableId, UnsavedCard, Parameter } from "metabase-types/api";
 import { isSavedCard } from "metabase-types/guards";
 import type { Dispatch } from "metabase-types/store";
 
@@ -21,3 +21,21 @@ export const loadMetadataForCard =
       return dispatch(Questions.actions.fetchAdhocMetadata(card.dataset_query));
     }
   };
+
+export const updateDynamicParameters = (
+  questionId: string,
+  parameters: Parameter[],
+) => ({
+  type: "UPDATE_DYNAMIC_PARAMETERS",
+  questionId,
+  parameters,
+});
+
+export const setDynamicParameters = (
+  questionId: string,
+  parameters: Parameter[],
+) => ({
+  type: "SET_DYNAMIC_PARAMETERS",
+  questionId,
+  parameters,
+});
