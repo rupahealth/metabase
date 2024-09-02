@@ -12,6 +12,7 @@ import type { ParametersListProps } from "metabase/parameters/components/Paramet
 import { getVisibleParameters } from "metabase/parameters/utils/ui";
 import { FilterButton } from "metabase/query_builder/components/ResponsiveParametersList.styled";
 import { Icon } from "metabase/ui";
+import visualizations from "metabase/visualizations";
 import type { Parameter, ParameterId } from "metabase-types/api";
 
 import { ParameterWidget } from "../ParameterWidget";
@@ -35,6 +36,7 @@ export const ParametersList = ({
   setParameterIndex,
   setEditingParameter,
   enableParameterRequiredBehavior,
+  updateQuestion,
 }: ParametersListProps) => {
   const [showFilterList, setShowFilterList] = useState(false);
   const [showRequiredFilters, setShowRequiredFilters] = useState(true);
@@ -42,6 +44,32 @@ export const ParametersList = ({
   const pointerSensor = useSensor(PointerSensor, {
     activationConstraint: { distance: 15 },
   });
+
+  const displayOptions = useMemo(() => {
+    return {
+      values: Array.from(visualizations.keys()),
+      "case-sensitive": false,
+    };
+  }, []);
+
+  const handleDisplayChange = useCallback(
+    (value: string) => {
+      if (question && updateQuestion) {
+        const newQuestion = question.setDisplay(value).lockDisplay();
+        const visualization = visualizations.get(value);
+        if (visualization?.onDisplayUpdate) {
+          const updatedSettings = visualization.onDisplayUpdate(
+            newQuestion.settings(),
+          );
+          newQuestion.setSettings(updatedSettings);
+        }
+
+        // Dispara a ação correta para atualizar a visualização
+        updateQuestion(newQuestion, { shouldUpdateUrl: true });
+      }
+    },
+    [question, updateQuestion],
+  );
 
   const visibleValuePopulatedParameters = useMemo(() => {
     const visibleParams = getVisibleParameters(parameters, hideParameters);
@@ -55,7 +83,8 @@ export const ParametersList = ({
   }, [parameters, hideParameters, isEditing]);
 
   const requiredFilters = useMemo(() => {
-    return parameters.filter(parameter => parameter.required);
+    const filters = parameters.filter(parameter => parameter.required);
+    return filters.sort((a, b) => (a.name > b.name ? 1 : -1));
   }, [parameters]);
 
   const hasNonHiddenParameters = useMemo(() => {
@@ -156,7 +185,7 @@ export const ParametersList = ({
           )}
         </div>
       )}
-      {showRequiredFilters && requiredFilters.length > 0 && (
+      {showRequiredFilters && (
         <div
           className={cx(
             className,
@@ -167,6 +196,29 @@ export const ParametersList = ({
             "required-filters",
           )}
         >
+          <ParameterWidget
+            key="display"
+            className={cx({ [CS.mb2]: vertical })}
+            isEditing={isEditing}
+            isFullscreen={isFullscreen}
+            parameter={{
+              id: "display",
+              name: "Display",
+              type: "dropdown",
+              slug: "display",
+              value: question?.display(),
+              options: displayOptions,
+            }}
+            parameters={parameters}
+            question={question}
+            dashboard={dashboard}
+            editingParameter={editingParameter}
+            setEditingParameter={setEditingParameter}
+            setValue={handleDisplayChange}
+            enableParameterRequiredBehavior={enableParameterRequiredBehavior}
+            commitImmediately={commitImmediately}
+            isSortable={false}
+          />
           {requiredFilters.map(parameter =>
             renderItem({ item: parameter, id: parameter.id }),
           )}

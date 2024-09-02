@@ -3,6 +3,7 @@ import type {
   EmbedHideParametersControls,
   DashboardNightModeControls,
 } from "metabase/dashboard/types";
+import type { UpdateQuestionOpts } from "metabase/query_builder/actions";
 import type Question from "metabase-lib/v1/Question";
 import type { Dashboard, Parameter, ParameterId } from "metabase-types/api";
 
@@ -27,6 +28,7 @@ export type ParametersListProps = {
     ) => void;
     setEditingParameter: (parameterId: ParameterId | null) => void;
     enableParameterRequiredBehavior: boolean;
+    updateQuestion: (question: Question, options: UpdateQuestionOpts) => void;
   } & Pick<DashboardFullscreenControls, "isFullscreen"> &
     Pick<DashboardNightModeControls, "isNightMode"> &
     Pick<EmbedHideParametersControls, "hideParameters">
