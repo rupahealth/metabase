@@ -13,6 +13,7 @@ import {
   getValuePopulatedParameters,
 } from "metabase/dashboard/selectors";
 import { useDispatch, useSelector } from "metabase/lib/redux";
+import { updateQuestion } from "metabase/query_builder/actions";
 
 import { ParametersList } from "../../../parameters/components/ParametersList";
 
@@ -34,6 +35,9 @@ export function DashboardParameterList({
 
   return (
     <ParametersList
+      updateQuestion={(question, opts) =>
+        dispatch(updateQuestion(question, opts))
+      } // Aqui garantimos que o dispatch seja chamado
       parameters={parameters}
       editingParameter={editingParameter}
       hideParameters={hiddenParameterSlugs}

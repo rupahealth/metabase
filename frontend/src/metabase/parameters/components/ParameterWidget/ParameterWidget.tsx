@@ -115,7 +115,9 @@ export const ParameterWidget = ({
             question={question}
             dashboard={dashboard}
             value={parameter.value}
-            setValue={value => setValue?.(value)}
+            setValue={value => {
+              setValue?.(value);
+            }}
             isEditing={isEditingParameter}
             placeholder={parameter.name}
             focusChanged={setIsFocused}

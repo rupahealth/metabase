@@ -104,7 +104,9 @@ export default function ParameterFieldWidget({
           defaultValue={parameter.default}
           isValueRequired={parameter.required ?? false}
           isValid={isValid}
-          onClick={() => setValue(unsavedValue)}
+          onClick={() => {
+            setValue(unsavedValue);
+          }}
         />
       </Footer>
     </WidgetRoot>

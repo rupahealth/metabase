@@ -2,14 +2,16 @@ import { useSensor, PointerSensor } from "@dnd-kit/core";
 import cx from "classnames";
 import { useCallback, useMemo, useState } from "react";
 
-import type {
-  DragEndEvent,
-  RenderItemProps,
+import {
+  type DragEndEvent,
+  type RenderItemProps,
+  SortableList,
 } from "metabase/core/components/Sortable";
-import { SortableList } from "metabase/core/components/Sortable";
 import CS from "metabase/css/core/index.css";
+import { useDispatch } from "metabase/lib/redux";
 import type { ParametersListProps } from "metabase/parameters/components/ParametersList/types";
 import { getVisibleParameters } from "metabase/parameters/utils/ui";
+import { updateQuestion } from "metabase/query_builder/actions";
 import { FilterButton } from "metabase/query_builder/components/ResponsiveParametersList.styled";
 import { Icon } from "metabase/ui";
 import visualizations from "metabase/visualizations";
@@ -36,8 +38,8 @@ export const ParametersList = ({
   setParameterIndex,
   setEditingParameter,
   enableParameterRequiredBehavior,
-  updateQuestion,
 }: ParametersListProps) => {
+  const dispatch = useDispatch();
   const [showFilterList, setShowFilterList] = useState(false);
   const [showRequiredFilters, setShowRequiredFilters] = useState(true);
 
@@ -53,22 +55,25 @@ export const ParametersList = ({
   }, []);
 
   const handleDisplayChange = useCallback(
-    (value: string) => {
-      if (question && updateQuestion) {
-        const newQuestion = question.setDisplay(value).lockDisplay();
-        const visualization = visualizations.get(value);
+    (value: string | string[]) => {
+      const displayValue = Array.isArray(value) ? value[0] : value;
+
+      if (question) {
+        let newQuestion = question.setDisplay(displayValue).lockDisplay();
+
+        const visualization = visualizations.get(displayValue);
+
         if (visualization?.onDisplayUpdate) {
           const updatedSettings = visualization.onDisplayUpdate(
             newQuestion.settings(),
           );
-          newQuestion.setSettings(updatedSettings);
+          newQuestion = newQuestion.setSettings(updatedSettings);
         }
 
-        // Dispara a ação correta para atualizar a visualização
-        updateQuestion(newQuestion, { shouldUpdateUrl: true });
+        dispatch(updateQuestion(newQuestion, { shouldUpdateUrl: true }));
       }
     },
-    [question, updateQuestion],
+    [question, dispatch],
   );
 
   const visibleValuePopulatedParameters = useMemo(() => {
@@ -214,11 +219,14 @@ export const ParametersList = ({
             dashboard={dashboard}
             editingParameter={editingParameter}
             setEditingParameter={setEditingParameter}
-            setValue={handleDisplayChange}
+            setValue={value => {
+              handleDisplayChange(value);
+            }}
             enableParameterRequiredBehavior={enableParameterRequiredBehavior}
             commitImmediately={commitImmediately}
             isSortable={false}
           />
+
           {requiredFilters.map(parameter =>
             renderItem({ item: parameter, id: parameter.id }),
           )}
