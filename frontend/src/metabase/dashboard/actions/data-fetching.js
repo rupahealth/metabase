@@ -165,17 +165,24 @@ export const fetchCardData = createThunkAction(
       // console.log("datasetQuery.parameters:",datasetQuery.parameters[0].value[0]);
       // console.log("parameterValues.e9896bc9[0]:",parameterValues.e9896bc9[0]);
 
-      // card.display = parameterValues.e9896bc9[0];
-      const vizualization_type = datasetQuery.parameters[0].value[0];
-      if (vizualization_type) {
-        card.display = datasetQuery.parameters[0].value[0];
-        dashcard.display = datasetQuery.parameters[0].value[0];
+      let parameter_id = null;
+      if (dashcard.parameter_mappings.length > 0) {
+        parameter_id = dashcard.parameter_mappings.find(
+          p => p.target[1][1] === "visualization_type",
+        ).parameter_id;
+        // const vizualization_type = datasetQuery.parameters[0].value[0];
+        const vizualization_type = parameterValues[parameter_id][0];
+        if (parameter_id) {
+          card.display = vizualization_type;
+          dashcard.display = vizualization_type;
+        }
+        // cancelFetchCardData(card.id, dashcard.id);
+        // dispatch(clearCardData(card.id, dashcard.id));
+        // dashcard.handleDone();
+        // reload = true;
+        // console.log("card.display:",card.display);
       }
-      // cancelFetchCardData(card.id, dashcard.id);
-      // dispatch(clearCardData(card.id, dashcard.id));
-      // dashcard.handleDone();
-      // reload = true;
-      // console.log("card.display:",card.display);
+
       const lastResult = getIn(dashcardData, [dashcard.id, card.id]);
       if (!reload) {
         if (
