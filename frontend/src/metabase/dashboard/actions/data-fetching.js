@@ -158,6 +158,24 @@ export const fetchCardData = createThunkAction(
         dashcard && dashcard.parameter_mappings,
       );
 
+      // console.log("card.display:",card.display);
+      // console.log("dashboard.parameters:",dashboard.parameters);
+      // console.log("parameterValues:",parameterValues);
+      // console.log("datasetQuery:",datasetQuery);
+      // console.log("datasetQuery.parameters:",datasetQuery.parameters[0].value[0]);
+      // console.log("parameterValues.e9896bc9[0]:",parameterValues.e9896bc9[0]);
+
+      // card.display = parameterValues.e9896bc9[0];
+      const vizualization_type = datasetQuery.parameters[0].value[0];
+      if (vizualization_type) {
+        card.display = datasetQuery.parameters[0].value[0];
+        dashcard.display = datasetQuery.parameters[0].value[0];
+      }
+      // cancelFetchCardData(card.id, dashcard.id);
+      // dispatch(clearCardData(card.id, dashcard.id));
+      // dashcard.handleDone();
+      // reload = true;
+      // console.log("card.display:",card.display);
       const lastResult = getIn(dashcardData, [dashcard.id, card.id]);
       if (!reload) {
         if (

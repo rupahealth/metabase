@@ -180,7 +180,6 @@ export const updateUrl = createThunkAction(
         cardId: question.id(),
         objectId,
       };
-
       const { currentState } = getState().qb;
       const queryParams = { ...getCurrentQueryParams(), display: displayValue };
 
