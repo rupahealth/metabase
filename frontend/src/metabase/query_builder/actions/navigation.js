@@ -61,9 +61,6 @@ export const popState = createThunkAction(
         const isEmptyQuery = !location.state.card.dataset_query.database;
 
         if (isEmptyQuery) {
-          // We are being navigated back to empty notebook edtor without data source selected.
-          // Reset QB state to aovid showing any data or errors from "future" history states.
-          // Do not run the question as the query without data source is invalid.
           await dispatch(initializeQB(location, {}));
         } else {
           await dispatch(
@@ -75,6 +72,17 @@ export const popState = createThunkAction(
       }
     }
 
+    // Captura o valor de display da URL e o aplica à questão
+    const urlParams = new URLSearchParams(window.location.search);
+    const displayFromURL = urlParams.get("display");
+    if (displayFromURL) {
+      const question = getQuestion(getState());
+      question.setDisplay(displayFromURL); // Aplicamos o display da URL à questão
+
+      question.updateVisualizationType(displayFromURL);
+
+      dispatch(updateUrl(question, { replaceState: true })); // Garante que o tipo de visualização seja atualizado
+    }
     const { queryBuilderMode: queryBuilderModeFromURL, ...uiControls } =
       getQueryBuilderModeFromLocation(location);
 
@@ -90,14 +98,14 @@ export const popState = createThunkAction(
 );
 
 const getURL = (location, { includeMode = false } = {}) =>
-  // strip off trailing queryBuilderMode
+  // remove o modo queryBuilder do final da URL
   (includeMode
     ? location.pathname
     : location.pathname.replace(/\/(notebook|view)$/, "")) +
   location.search +
   location.hash;
 
-// Logic for handling location changes, dispatched by top-level QueryBuilder component
+// Lógica para lidar com alterações de localização
 export const locationChanged =
   (location, nextLocation, nextParams) => dispatch => {
     if (location !== nextLocation) {
@@ -106,16 +114,13 @@ export const locationChanged =
           getURL(nextLocation, { includeMode: true }) !==
           getURL(location, { includeMode: true })
         ) {
-          // the browser forward/back button was pressed
-
+          // o botão de avançar/voltar do navegador foi pressionado
           dispatch(popState(nextLocation));
         }
       } else if (
         (nextLocation.action === "PUSH" || nextLocation.action === "REPLACE") &&
-        // ignore PUSH/REPLACE with `state` because they were initiated by the `updateUrl` action
-        nextLocation.state === undefined
+        nextLocation.state === undefined // ignorar PUSH/REPLACE com `state` porque foram iniciados pela ação `updateUrl`
       ) {
-        // a link to a different qb url was clicked
         dispatch(initializeQB(nextLocation, nextParams));
       }
     }
@@ -149,8 +154,7 @@ export const updateUrl = createThunkAction(
       }
 
       const { isNative } = Lib.queryDisplayInfo(question.query());
-      // prevent clobbering of hash when there are fake parameters on the question
-      // consider handling this in a more general way, somehow
+
       if (!isNative && question.parameters().length > 0) {
         dirty = true;
       }
@@ -162,15 +166,26 @@ export const updateUrl = createThunkAction(
         datasetEditorTab = getDatasetEditorTab(getState());
       }
 
+      // Capturar o valor de visualization_type da query e aplicar ao display
+      const visualizationTypeParam = getCurrentQueryParams().visualization_type;
+      const displayValue = visualizationTypeParam || "table"; // Se não houver visualization_type, usa 'table' como padrão
+
+      const newCard = question._doNotCallSerializableCard();
+      if (displayValue !== newCard.display) {
+        newCard.display = displayValue;
+      }
+
       const newState = {
-        card: question._doNotCallSerializableCard(),
+        card: newCard,
         cardId: question.id(),
         objectId,
       };
 
       const { currentState } = getState().qb;
-      const queryParams = preserveParameters ? getCurrentQueryParams() : {};
+      const queryParams = { ...getCurrentQueryParams(), display: displayValue };
+
       const url = getURLForCardState(newState, dirty, queryParams, objectId);
+      // console.log("Generated URL:", url);
 
       const urlParsed = parseUrl(url);
       const locationDescriptor = {
@@ -181,7 +196,7 @@ export const updateUrl = createThunkAction(
         }),
         search: urlParsed.search,
         hash: urlParsed.hash,
-        state: newState,
+        state: { ...newState, formNavigation: true },
       };
 
       const isSameURL =
@@ -199,22 +214,19 @@ export const updateUrl = createThunkAction(
       }
 
       if (replaceState == null) {
-        // if the serialized card is identical replace the previous state instead of adding a new one
-        // e.x. when saving a new card we want to replace the state and URL with one with the new card ID
         replaceState = isSameCard && isSameMode;
       }
 
-      // this is necessary because we can't get the state from history.state
       dispatch(setCurrentState(newState));
 
       try {
         if (replaceState) {
+          // console.log("Final locationDescriptor:", locationDescriptor);
           dispatch(replace(locationDescriptor));
         } else {
           dispatch(push(locationDescriptor));
         }
       } catch (e) {
-        // saving the location state can exceed the session storage quota (metabase#25312)
         console.warn(e);
       }
     },
