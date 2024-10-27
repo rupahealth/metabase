@@ -132,20 +132,6 @@ export const fetchCardData = createThunkAction(
         };
       }
 
-      // Captura o valor de visualization_type da URL e aplica ao card
-      const urlParams = new URLSearchParams(window.location.search);
-      const visualizationTypeParam = urlParams.get(
-        `visualization_type_${dashcard.id}`,
-      );
-
-      if (visualizationTypeParam && visualizationTypeParam !== card.display) {
-        card.display = visualizationTypeParam; // Aplica o valor da URL ao card
-      }
-
-      // Limpar o cache e recarregar o card para garantir a renderização correta
-      cancelFetchCardData(card.id, dashcard.id);
-      dispatch(clearCardData(card.id, dashcard.id)); // Garantir que o card será recarregado
-
       const dashboardType = getDashboardType(dashcard.dashboard_id);
       const { dashboardId, dashboards, parameterValues, dashcardData } =
         getState().dashboard;
@@ -158,29 +144,17 @@ export const fetchCardData = createThunkAction(
         dashcard && dashcard.parameter_mappings,
       );
 
-      // console.log("card.display:",card.display);
-      // console.log("dashboard.parameters:",dashboard.parameters);
-      // console.log("parameterValues:",parameterValues);
-      // console.log("datasetQuery:",datasetQuery);
-      // console.log("datasetQuery.parameters:",datasetQuery.parameters[0].value[0]);
-      // console.log("parameterValues.e9896bc9[0]:",parameterValues.e9896bc9[0]);
-
       let parameter_id = null;
       if (dashcard.parameter_mappings.length > 0) {
         parameter_id = dashcard.parameter_mappings.find(
           p => p.target[1][1] === "visualization_type",
         ).parameter_id;
-        // const vizualization_type = datasetQuery.parameters[0].value[0];
         const vizualization_type = parameterValues[parameter_id][0];
         if (parameter_id) {
           card.display = vizualization_type;
-          dashcard.display = vizualization_type;
+          // dashcard.display = vizualization_type;
         }
-        // cancelFetchCardData(card.id, dashcard.id);
-        // dispatch(clearCardData(card.id, dashcard.id));
-        // dashcard.handleDone();
-        // reload = true;
-        // console.log("card.display:",card.display);
+        // TODO: How to trigger Dashcard re-render?
       }
 
       const lastResult = getIn(dashcardData, [dashcard.id, card.id]);
@@ -328,6 +302,28 @@ export const fetchDashboardCardData =
       dashboard,
       selectedTabId,
     ).filter(({ dashcard }) => !isVirtualDashCard(dashcard));
+
+    // for (var i = 0; i < nonVirtualDashcards.length; i++) {
+    //   var dashcard = nonVirtualDashcards[i].dashcard;
+    //   console.log("cards.dashcard.card_id",dashcard.card_id);
+    //   console.log("cards.dashcard.display",dashcard.card.display);
+    //   // dashcard.card.display = 'table';
+
+    //   let parameter_id = null;
+    //   if (dashcard.parameter_mappings.length > 0) {
+    //     parameter_id = dashcard.parameter_mappings.find(
+    //       p => p.target[1][1] === "visualization_type",
+    //     ).parameter_id;
+    //     const { parameterValues } = getState().dashboard;
+    //     const vizualization_type = parameterValues[parameter_id][0];
+    //     if (parameter_id) {
+    //       dashcard.card.display = vizualization_type;
+    //     }
+    //     // TODO: How to trigger Dashcard re-render?
+    //     // updateDashcardDisplayType(dashcard.id, vizualization_type);
+    //   }
+
+    // }
 
     let nonVirtualDashcardsToFetch = [];
     if (isRefreshing) {

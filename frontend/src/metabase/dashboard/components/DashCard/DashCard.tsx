@@ -141,21 +141,16 @@ function DashCardInner({
     }
   });
 
-  const mainCard: Card | VirtualCard = useMemo(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const visualizationTypeParam = urlParams.get(
-      `visualization_type_${dashcard.id}`,
-    );
-
-    return {
+  const mainCard: Card | VirtualCard = useMemo(
+    () => ({
       ...dashcard.card,
       visualization_settings: mergeSettings(
         dashcard?.card?.visualization_settings,
         dashcard.visualization_settings,
       ),
-      display: visualizationTypeParam || dashcard.card.display || "line",
-    } as Card;
-  }, [dashcard]);
+    }),
+    [dashcard],
+  );
 
   const cards = useMemo(() => {
     if (isQuestionDashCard(dashcard) && Array.isArray(dashcard.series)) {
