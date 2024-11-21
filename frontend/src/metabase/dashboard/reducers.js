@@ -3,6 +3,7 @@ import produce from "immer";
 import reduceReducers from "reduce-reducers";
 import _ from "underscore";
 
+import { VisualizationType } from "metabase/dashboard/components/DashCard/types";
 import Actions from "metabase/entities/actions";
 import Dashboards from "metabase/entities/dashboards";
 import Questions from "metabase/entities/questions";
@@ -189,7 +190,13 @@ const dashcards = handleActions(
     },
     [ADD_CARD_TO_DASH]: (state, { payload: dashcard }) => ({
       ...state,
-      [dashcard.id]: { ...dashcard, isAdded: true, justAdded: true },
+      [dashcard.id]: {
+        ...dashcard,
+        isAdded: true,
+        justAdded: true,
+        visualizationType:
+          dashcard.visualizationType || VisualizationType.TABLE,
+      },
     }),
     [ADD_MANY_CARDS_TO_DASH]: (state, { payload: dashcards }) => {
       const storeDashcards = dashcards.map((dc, index) => ({

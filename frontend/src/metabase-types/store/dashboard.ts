@@ -1,3 +1,4 @@
+import type { VisualizationType } from "metabase/dashboard/components/DashCard/types";
 import type { DisplayTheme } from "metabase/public/lib/types";
 import type {
   Dashboard,
@@ -64,6 +65,7 @@ export type StoreDashcard = DashboardCard & {
   isAdded?: boolean;
   isDirty?: boolean;
   isRemoved?: boolean;
+  visualizationType?: VisualizationType;
 };
 
 export type SelectedTabId = number | null;
@@ -122,4 +124,6 @@ export interface DashboardState {
   tabDeletions: Record<TabDeletionId, TabDeletion>;
 
   theme: DisplayTheme;
+
+  visualizationType?: VisualizationType;
 }
