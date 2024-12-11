@@ -44,13 +44,12 @@ export const ParametersList = ({
   });
 
   const visibleValuePopulatedParameters = useMemo(() => {
-    // Ajuste para garantir que os parâmetros ocultos pelo #hide sejam filtrados corretamente
     const visibleParams = getVisibleParameters(parameters, hideParameters);
     return visibleParams.filter(
       parameter =>
-        isEditing || // Se estiver em modo de edição, mostramos todos os parâmetros
+        isEditing ||
         (!parameter.name.startsWith("#hide") &&
-          !parameter.name.endsWith("#hide")), // Filtramos os parâmetros com #hide
+          !parameter.name.endsWith("#hide")),
     );
   }, [parameters, hideParameters, isEditing]);
 
