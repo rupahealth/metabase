@@ -152,9 +152,7 @@ export const fetchCardData = createThunkAction(
         const vizualization_type = parameterValues[parameter_id][0];
         if (parameter_id) {
           card.display = vizualization_type;
-          // dashcard.display = vizualization_type;
         }
-        // TODO: How to trigger Dashcard re-render?
       }
 
       const lastResult = getIn(dashcardData, [dashcard.id, card.id]);
@@ -302,28 +300,6 @@ export const fetchDashboardCardData =
       dashboard,
       selectedTabId,
     ).filter(({ dashcard }) => !isVirtualDashCard(dashcard));
-
-    // for (var i = 0; i < nonVirtualDashcards.length; i++) {
-    //   var dashcard = nonVirtualDashcards[i].dashcard;
-    //   console.log("cards.dashcard.card_id",dashcard.card_id);
-    //   console.log("cards.dashcard.display",dashcard.card.display);
-    //   // dashcard.card.display = 'table';
-
-    //   let parameter_id = null;
-    //   if (dashcard.parameter_mappings.length > 0) {
-    //     parameter_id = dashcard.parameter_mappings.find(
-    //       p => p.target[1][1] === "visualization_type",
-    //     ).parameter_id;
-    //     const { parameterValues } = getState().dashboard;
-    //     const vizualization_type = parameterValues[parameter_id][0];
-    //     if (parameter_id) {
-    //       dashcard.card.display = vizualization_type;
-    //     }
-    //     // TODO: How to trigger Dashcard re-render?
-    //     // updateDashcardDisplayType(dashcard.id, vizualization_type);
-    //   }
-
-    // }
 
     let nonVirtualDashcardsToFetch = [];
     if (isRefreshing) {

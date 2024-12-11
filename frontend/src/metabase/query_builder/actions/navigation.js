@@ -163,8 +163,6 @@ export const updateUrl = createThunkAction(
       }
 
       const visualization_type = getCurrentQueryParams().visualization_type;
-      // const displayValue = visualizationTypeParam || "table"; // Se não houver visualization_type, usa 'table' como padrão
-      // let params = question.parameters();
       const newCard = question._doNotCallSerializableCard();
       if (visualization_type && visualization_type !== newCard.display) {
         newCard.display = visualization_type;
