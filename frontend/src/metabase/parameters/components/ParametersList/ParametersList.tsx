@@ -36,7 +36,7 @@ export const ParametersList = ({
   setEditingParameter,
   enableParameterRequiredBehavior,
 }: ParametersListProps) => {
-  const [showFilterList, setShowFilterList] = useState(true); // Inicialmente true para garantir que os filtros opcionais apareçam
+  const [showFilterList, setShowFilterList] = useState(true);
   const [showRequiredFilters, setShowRequiredFilters] = useState(true);
 
   const pointerSensor = useSensor(PointerSensor, {
@@ -47,9 +47,9 @@ export const ParametersList = ({
     const visibleParams = getVisibleParameters(parameters, hideParameters);
     return visibleParams.filter(
       parameter =>
-        isEditing ||
+        isEditing || // If you're in edit mode, we'll show you all the parameters
         (!parameter.name.startsWith("#hide") &&
-          !parameter.name.endsWith("#hide")),
+          !parameter.name.endsWith("#hide")), // Filter the parameters with #hide
     );
   }, [parameters, hideParameters, isEditing]);
 
