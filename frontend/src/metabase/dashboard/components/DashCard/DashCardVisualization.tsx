@@ -38,6 +38,7 @@ import {
 import { DashCardMenu } from "./DashCardMenu/DashCardMenu";
 import { DashCardParameterMapper } from "./DashCardParameterMapper/DashCardParameterMapper";
 import type {
+  VisualizationType,
   CardSlownessStatus,
   DashCardOnChangeCardAndRunHandler,
 } from "./types";
@@ -90,8 +91,7 @@ interface DashCardVisualizationProps {
   downloadsEnabled: boolean;
 }
 
-// This is done to add the `getExtraDataForClick` prop.
-// We need that to pass relevant data along with the clicked object.
+// Atualizando a visualização com o enum VisualizationType
 
 export function DashCardVisualization({
   dashcard,
@@ -132,6 +132,8 @@ export function DashCardVisualization({
       ? new Question(dashcard.card, metadata)
       : null;
   }, [dashcard.card, metadata]);
+
+  const visualizationType = dashcard.visualizationType as VisualizationType;
 
   const handleOnUpdateVisualizationSettings = useCallback(
     (settings: VisualizationSettings) => {
@@ -246,6 +248,7 @@ export function DashCardVisualization({
 
   return (
     <Visualization
+      visualizationType={visualizationType} // Passando o visualizationType usando o enum
       className={cx(CS.flexFull, {
         [CS.pointerEventsNone]: isEditingDashboardLayout,
         [CS.overflowAuto]: visualizationOverlay,

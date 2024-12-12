@@ -1,3 +1,4 @@
+import { VisualizationType } from "metabase/dashboard/components/DashCard/types";
 import type {
   DashboardSidebarName,
   DashboardState,
@@ -24,6 +25,7 @@ export const INITIAL_DASHBOARD_STATE: DashboardState = {
   dashboards: {},
   dashcards: {},
   dashcardData: {},
+  visualizationType: VisualizationType.TABLE,
   parameterValues: {},
   draftParameterValues: {},
   loadingDashCards: {

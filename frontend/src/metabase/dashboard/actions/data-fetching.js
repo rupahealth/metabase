@@ -124,8 +124,6 @@ export const fetchCardData = createThunkAction(
         },
       });
 
-      // If the dataset_query was filtered then we don't have permission to view this card, so
-      // shortcircuit and return a fake 403
       if (!card.dataset_query) {
         return {
           dashcard_id: dashcard.id,
@@ -135,12 +133,10 @@ export const fetchCardData = createThunkAction(
       }
 
       const dashboardType = getDashboardType(dashcard.dashboard_id);
-
       const { dashboardId, dashboards, parameterValues, dashcardData } =
         getState().dashboard;
       const dashboard = dashboards[dashboardId];
 
-      // if we have a parameter, apply it to the card query before we execute
       const datasetQuery = applyParameters(
         card,
         dashboard.parameters,
@@ -148,9 +144,19 @@ export const fetchCardData = createThunkAction(
         dashcard && dashcard.parameter_mappings,
       );
 
+      let parameter_id = null;
+      if (dashcard.parameter_mappings.length > 0) {
+        parameter_id = dashcard.parameter_mappings.find(
+          p => p.target[1][1] === "visualization_type",
+        ).parameter_id;
+        const vizualization_type = parameterValues[parameter_id][0];
+        if (parameter_id) {
+          card.display = vizualization_type;
+        }
+      }
+
       const lastResult = getIn(dashcardData, [dashcard.id, card.id]);
       if (!reload) {
-        // if reload not set, check to see if the last result has the same query dict and return that
         if (
           lastResult &&
           equals(
@@ -166,25 +172,7 @@ export const fetchCardData = createThunkAction(
         }
       }
 
-      cancelFetchCardData(card.id, dashcard.id);
-
-      // When dashcard parameters change, we need to clean previous (stale)
-      // state so that the loader spinner shows as expected (#33767)
-      const hasParametersChanged =
-        !lastResult ||
-        !equals(
-          getDatasetQueryParams(lastResult.json_query).parameters,
-          getDatasetQueryParams(datasetQuery).parameters,
-        );
-
-      if (clearCache || hasParametersChanged) {
-        // clears the card data to indicate the card is reloading
-        dispatch(clearCardData(card.id, dashcard.id));
-      }
-
       let result = null;
-
-      // start a timer that will show the expected card duration if the query takes too long
       const slowCardTimer = setTimeout(() => {
         if (result === null) {
           dispatch(markCardAsSlow(card, datasetQuery));
@@ -203,7 +191,6 @@ export const fetchCardData = createThunkAction(
         cancelled: deferred.promise,
       };
 
-      // make the actual request
       if (datasetQuery.type === "endpoint") {
         result = await fetchDataOrError(
           MetabaseApi.datasetEndpoint(
@@ -267,7 +254,6 @@ export const fetchCardData = createThunkAction(
           isNewAdditionalSeriesCard(card, dashcard) ||
           hasReplacedCard;
 
-        // new dashcards and new additional series cards aren't yet saved to the dashboard, so they need to be run using the card query endpoint
         const endpoint = shouldUseCardQueryEndpoint
           ? CardApi.query
           : DashboardApi.cardQuery;

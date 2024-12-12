@@ -1,3 +1,4 @@
+import type { VisualizationType } from "metabase/dashboard/components/DashCard/types";
 import type { EmbeddingParameters } from "metabase/public/lib/types";
 import type {
   ClickBehavior,
@@ -109,6 +110,7 @@ export type BaseDashboardCard = DashboardCardLayoutAttrs & {
   justAdded?: boolean;
   created_at: string;
   updated_at: string;
+  visualizationType?: VisualizationType;
 };
 
 export type VirtualCardDisplay =

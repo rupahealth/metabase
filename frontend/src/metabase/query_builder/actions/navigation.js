@@ -162,6 +162,12 @@ export const updateUrl = createThunkAction(
         datasetEditorTab = getDatasetEditorTab(getState());
       }
 
+      const visualization_type = getCurrentQueryParams().visualization_type;
+      const newCard = question._doNotCallSerializableCard();
+      if (visualization_type && visualization_type !== newCard.display) {
+        newCard.display = visualization_type;
+      }
+
       const newState = {
         card: question._doNotCallSerializableCard(),
         cardId: question.id(),

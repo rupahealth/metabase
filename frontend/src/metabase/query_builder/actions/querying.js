@@ -104,6 +104,14 @@ export const runQuestionQuery = ({
       : getQuestion(getState());
     const originalQuestion = getOriginalQuestion(getState());
 
+    const visualization_type = question._card.parameters.find(
+      x => x.slug === "visualization_type",
+    );
+    if (visualization_type) {
+      question._card.display =
+        question._parameterValues[visualization_type.id][0];
+    }
+
     const isCardDirty = originalQuestion
       ? question.isDirtyComparedToWithoutParameters(originalQuestion) ||
         question.id() == null
